@@ -1,0 +1,447 @@
+# geamtaixiuuytinh
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tài Xỉu Online</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <header class="header">
+            <div class="user-info">
+                <span class="avatar">👤</span>
+                <span class="username">Player_Lab</span>
+            </div>
+            <div class="balance-box">
+                <span class="coin-icon">💰</span>
+                <span id="balance">10,000,000</span> VNĐ
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Bảng hiển thị kết quả và Đĩa Lắc -->
+            <div class="plate-area">
+                <div class="plate">
+                    <div class="dice-container" id="diceContainer">
+                        <div class="dice" id="dice1">?</div>
+                        <div class="dice" id="dice2">?</div>
+                        <div class="dice" id="dice3">?</div>
+                    </div>
+                </div>
+                <div class="timer" id="timer">30</div>
+            </div>
+
+            <div class="status-msg" id="statusMsg">Đặt cược đi nào!</div>
+
+            <!-- Khu vực đặt cược Tài / Xỉu -->
+            <div class="bet-area">
+                <div class="bet-btn bet-tai" id="btnTai" onclick="selectSide('tai')">
+                    <h2>TÀI</h2>
+                    <p class="ratio">11 - 17</p>
+                    <div class="my-bet" id="myBetTai">0</div>
+                </div>
+
+                <div class="bet-btn bet-xiu" id="btnXiu" onclick="selectSide('xiu')">
+                    <h2>XỈU</h2>
+                    <p class="ratio">4 - 10</p>
+                    <div class="my-bet" id="myBetXiu">0</div>
+                </div>
+            </div>
+
+            <!-- Thanh chọn tiền cược -->
+            <div class="control-panel">
+                <div class="quick-chips">
+                    <button onclick="addChip(10000)">10K</button>
+                    <button onclick="addChip(50000)">50K</button>
+                    <button onclick="addChip(100000)">100K</button>
+                    <button onclick="addChip(500000)">500K</button>
+                    <button onclick="addChip(1000000)">1M</button>
+                    <button onclick="clearChip()" class="btn-clear">Xóa</button>
+                </div>
+
+                <div class="action-buttons">
+                    <input type="number" id="betAmount" value="100000" min="10000" step="10000">
+                    <button class="btn-action" id="rollBtn" onclick="confirmBet()">ĐẶT CƯỢC</button>
+                </div>
+            </div>
+
+            <!-- Lịch sử soi cầu -->
+            <div class="history-section">
+                <h3>LỊCH SỬ CẦU</h3>
+                <div class="history-list" id="historyList">
+                    <!-- Các chấm lịch sử sẽ tự động sinh ở đây -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #0f172a;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.game-wrapper {
+    width: 100%;
+    max-width: 480px;
+    background: #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
+    padding: 16px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+    padding: 10px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.balance-box {
+    color: #f59e0b;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.plate-area {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.plate {
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, #334155 0%, #0f172a 100%);
+    border: 4px solid #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dice-container {
+    display: flex;
+    gap: 8px;
+}
+
+.dice {
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    color: #000;
+    font-weight: bold;
+    font-size: 20px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+
+.timer {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    background: #ef4444;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.status-msg {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #38bdf8;
+    margin-bottom: 15px;
+    min-height: 24px;
+}
+
+.bet-area {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.bet-btn {
+    flex: 1;
+    background: #334155;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.2s;
+}
+
+.bet-btn.active {
+    border-color: #f59e0b;
+    background: #475569;
+}
+
+.bet-tai h2 { color: #ef4444; }
+.bet-xiu h2 { color: #3b82f6; }
+
+.ratio {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.my-bet {
+    margin-top: 8px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.control-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.quick-chips {
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.quick-chips button {
+    flex: 1;
+    padding: 8px 0;
+    background: #334155;
+    border: none;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.quick-chips button:hover {
+    background: #475569;
+}
+
+.quick-chips .btn-clear {
+    background: #64748b;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+}
+
+.btn-action {
+    flex: 1;
+    background: #10b981;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-action:hover {
+    background: #059669;
+}
+
+.btn-action:disabled {
+    background: #475569;
+    cursor: not-allowed;
+}
+
+.history-section h3 {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.history-list {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 6px;
+    background: #0f172a;
+    border-radius: 8px;
+}
+
+.dot {
+    min-width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.dot-tai { background: #ef4444; color: #fff; }
+.dot-xiu { background: #3b82f6; color: #fff; }
+let balance = 10000000;
+let selectedSide = null;
+let currentBetAmount = 0;
+let isRolling = false;
+let history = [];
+
+function selectSide(side) {
+    if (isRolling) return;
+    selectedSide = side;
+    document.getElementById('btnTai').classList.remove('active');
+    document.getElementById('btnXiu').classList.remove('active');
+
+    if (side === 'tai') {
+        document.getElementById('btnTai').classList.add('active');
+    } else {
+        document.getElementById('btnXiu').classList.add('active');
+    }
+}
+
+function addChip(amount) {
+    if (isRolling) return;
+    const input = document.getElementById('betAmount');
+    let val = parseInt(input.value) || 0;
+    input.value = val + amount;
+}
+
+function clearChip() {
+    if (isRolling) return;
+    document.getElementById('betAmount').value = 0;
+}
+
+function confirmBet() {
+    if (isRolling) return;
+    
+    const amount = parseInt(document.getElementById('betAmount').value);
+    
+    if (!selectedSide) {
+        alert("Vui lòng chọn TÀI hoặc XỈU!");
+        return;
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+        alert("Số tiền cược không hợp lệ!");
+        return;
+    }
+
+    if (amount > balance) {
+        alert("Số dư tài khoản không đủ!");
+        return;
+    }
+
+    currentBetAmount = amount;
+    if (selectedSide === 'tai') {
+        document.getElementById('myBetTai').innerText = currentBetAmount.toLocaleString('vi-VN');
+        document.getElementById('myBetXiu').innerText = "0";
+    } else {
+        document.getElementById('myBetXiu').innerText = currentBetAmount.toLocaleString('vi-VN');
+        document.getElementById('myBetTai').innerText = "0";
+    }
+
+    runDiceRoll();
+}
+
+function runDiceRoll() {
+    isRolling = true;
+    document.getElementById('rollBtn').disabled = true;
+    document.getElementById('statusMsg').innerText = "Đang lắc xúc xắc...";
+
+    let rolls = 0;
+    const interval = setInterval(() => {
+        let d1 = Math.floor(Math.random() * 6) + 1;
+        let d2 = Math.floor(Math.random() * 6) + 1;
+        let d3 = Math.floor(Math.random() * 6) + 1;
+
+        document.getElementById('dice1').innerText = d1;
+        document.getElementById('dice2').innerText = d2;
+        document.getElementById('dice3').innerText = d3;
+
+        rolls++;
+        if (rolls > 20) {
+            clearInterval(interval);
+            calculateResult(d1, d2, d3);
+        }
+    }, 80);
+}
+
+function calculateResult(d1, d2, d3) {
+    const total = d1 + d2 + d3;
+    const resultSide = (total >= 11 && total <= 17) ? 'tai' : 'xiu';
+
+    let msg = `Kết quả: ${total} điểm (${resultSide.toUpperCase()}) - `;  if (selectedSide === resultSide) { balance += currentBetAmount; msg += `Bạn thắng +${currentBetAmount.toLocaleString('vi-VN')} VNĐ`;
+    } else {
+        balance -= currentBetAmount;
+        msg += `Bạn thua -${currentBetAmount.toLocaleString('vi-VN')} VNĐ`;
+    }
+
+    // Cập nhật giao diện
+    document.getElementById('balance').innerText = balance.toLocaleString('vi-VN');
+    document.getElementById('statusMsg').innerText = msg;
+    
+    // Lưu lịch sử
+    addHistory(resultSide, total);
+
+    // Reset trạng thái cược
+    isRolling = false;
+    document.getElementById('rollBtn').disabled = false;
+    document.getElementById('myBetTai').innerText = "0";
+    document.getElementById('myBetXiu').innerText = "0";
+    selectedSide = null;
+    document.getElementById('btnTai').classList.remove('active');
+    document.getElementById('btnXiu').classList.remove('active');
+}
+
+function addHistory(side, total) {
+    history.push({ side, total });
+    if (history.length > 15) history.shift();
+
+    const historyContainer = document.getElementById('historyList');
+    historyContainer.innerHTML = '';
+
+    history.forEach(item => {
+        const dot = document.createElement('div');
+        dot.className = `dot ${item.side === 'tai' ? 'dot-tai' : 'dot-xiu'}`; dot.innerText = item.side === 'tai' ? 'T' : 'X'; dot.title = `Tổng: ${item.total}`;
+        historyContainer.appendChild(dot);
+    });
+}
